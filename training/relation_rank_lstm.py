@@ -24,7 +24,7 @@ from evaluator import evaluate
 
 seed = 123456789
 np.random.seed(seed)
-tf.set_random_seed(seed)
+tf.random.set_seed(seed)
 
 class ReRaLSTM:
     def __init__(self, data_path, market_name, tickers_fname, relation_name,
@@ -33,7 +33,7 @@ class ReRaLSTM:
         seed = 123456789
         random.seed(seed)
         np.random.seed(seed)
-        tf.set_random_seed(seed)
+        tf.random.set_seed(seed)
 
         self.data_path = data_path
         self.market_name = market_name
@@ -106,7 +106,7 @@ class ReRaLSTM:
             seed = 123456789
             random.seed(seed)
             np.random.seed(seed)
-            tf.set_random_seed(seed)
+            tf.random.set_seed(seed)
 
             ground_truth = tf.placeholder(tf.float32, [self.batch_size, 1])
             mask = tf.placeholder(tf.float32, [self.batch_size, 1])
