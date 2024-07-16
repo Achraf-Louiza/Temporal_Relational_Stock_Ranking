@@ -5,27 +5,25 @@ import os
 # import psutil
 import random
 from time import time
-import tensorflow.compat.v1 as tf
 try:
     from tensorflow.python.ops.nn_ops import leaky_relu
 except ImportError:
     from tensorflow.python.framework import ops
     from tensorflow.python.ops import math_ops
 
-
     def leaky_relu(features, alpha=0.2, name=None):
         with ops.name_scope(name, "LeakyRelu", [features, alpha]):
             features = ops.convert_to_tensor(features, name="features")
             alpha = ops.convert_to_tensor(alpha, name="alpha")
             return math_ops.maximum(alpha * features, features)
-
+import tensorflow.compat.v1 as tf
+tf.disable_v2_behavior()
 from load_data import load_EOD_data, load_relation_data
 from evaluator import evaluate
 
 seed = 123456789
 np.random.seed(seed)
-tf.random.set_seed(seed)
-tf.disable_v2_behavior()
+tf.set_random_seed(seed)
 
 class ReRaLSTM:
     def __init__(self, data_path, market_name, tickers_fname, relation_name,
@@ -34,7 +32,7 @@ class ReRaLSTM:
         seed = 123456789
         random.seed(seed)
         np.random.seed(seed)
-        tf.random.set_seed(seed)
+        tf.set_random_seed(seed)
 
         self.data_path = data_path
         self.market_name = market_name
@@ -107,7 +105,7 @@ class ReRaLSTM:
             seed = 123456789
             random.seed(seed)
             np.random.seed(seed)
-            tf.random.set_seed(seed)
+            tf.set_random_seed(seed)
 
             ground_truth = tf.placeholder(tf.float32, [self.batch_size, 1])
             mask = tf.placeholder(tf.float32, [self.batch_size, 1])
