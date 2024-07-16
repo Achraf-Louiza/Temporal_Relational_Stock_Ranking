@@ -4,8 +4,8 @@ import numpy as np
 import os
 # import psutil
 import random
-import tensorflow as tf
 from time import time
+import tensorflow.compat.v1 as tf
 try:
     from tensorflow.python.ops.nn_ops import leaky_relu
 except ImportError:
@@ -25,6 +25,7 @@ from evaluator import evaluate
 seed = 123456789
 np.random.seed(seed)
 tf.random.set_seed(seed)
+tf.disable_v2_behavior()
 
 class ReRaLSTM:
     def __init__(self, data_path, market_name, tickers_fname, relation_name,
