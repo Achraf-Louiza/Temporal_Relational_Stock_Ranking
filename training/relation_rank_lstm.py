@@ -4,6 +4,10 @@ import numpy as np
 import os
 # import psutil
 import random
+
+import tensorflow.compat.v1 as tf
+tf.disable_v2_behavior()
+
 from time import time
 try:
     from tensorflow.python.ops.nn_ops import leaky_relu
@@ -16,10 +20,11 @@ except ImportError:
             features = ops.convert_to_tensor(features, name="features")
             alpha = ops.convert_to_tensor(alpha, name="alpha")
             return math_ops.maximum(alpha * features, features)
-import tensorflow.compat.v1 as tf
-tf.disable_v2_behavior()
+
 from load_data import load_EOD_data, load_relation_data
 from evaluator import evaluate
+import tensorflow.compat.v1 as tf
+tf.disable_v2_behavior()
 
 seed = 123456789
 np.random.seed(seed)
@@ -29,6 +34,7 @@ class ReRaLSTM:
     def __init__(self, data_path, market_name, tickers_fname, relation_name,
                  emb_fname, parameters, steps=1, epochs=50, batch_size=None, flat=False, gpu=False, in_pro=False):
 
+        # Set seeds for reproducibility
         seed = 123456789
         random.seed(seed)
         np.random.seed(seed)
@@ -38,7 +44,8 @@ class ReRaLSTM:
         self.market_name = market_name
         self.tickers_fname = tickers_fname
         self.relation_name = relation_name
-        # load data
+        
+        # Load data
         self.tickers = np.genfromtxt(os.path.join(data_path, '..', tickers_fname),
                                      dtype=str, delimiter='\t', skip_header=False)
 
@@ -46,7 +53,7 @@ class ReRaLSTM:
         self.eod_data, self.mask_data, self.gt_data, self.price_data = \
             load_EOD_data(data_path, market_name, self.tickers, steps)
 
-        # relation data
+        # Load relation data
         rname_tail = {'sector_industry': '_industry_relation.npy',
                       'wikidata': '_wiki_relation.npy'}
 
@@ -57,6 +64,7 @@ class ReRaLSTM:
         print('relation encoding shape:', self.rel_encoding.shape)
         print('relation mask shape:', self.rel_mask.shape)
 
+        # Load embedding
         self.embedding = np.load(
             os.path.join(self.data_path, '..', 'pretrain', emb_fname))
         print('embedding shape:', self.embedding.shape)
@@ -66,16 +74,11 @@ class ReRaLSTM:
         self.epochs = epochs
         self.flat = flat
         self.inner_prod = in_pro
-        if batch_size is None:
-            self.batch_size = len(self.tickers)
-        else:
-            self.batch_size = batch_size
-
+        self.batch_size = batch_size if batch_size else len(self.tickers)
         self.valid_index = 756
         self.test_index = 1008
         self.trade_dates = self.mask_data.shape[1]
         self.fea_dim = 5
-
         self.gpu = gpu
 
     def get_batch(self, offset=None):
