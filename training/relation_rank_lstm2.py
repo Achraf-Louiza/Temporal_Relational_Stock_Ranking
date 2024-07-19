@@ -64,10 +64,20 @@ class ReRaLSTM:
     def load_relational_data(self):
         rname_tail = {'sector_industry': '_industry_relation.npy',
                       'wikidata': '_wiki_relation.npy'}
-        self.rel_encoding, self.rel_mask = load_relation_data(
-            os.path.join(self.data_path, '..', 'relation', self.relation_name,
-                         self.market_name + rname_tail[self.relation_name])
+        rel_encoding_wiki, rel_mask_wiki = load_relation_data(
+                                             os.path.join('data', 'relation', 'wikidata',
+                                             self.market_name + rname_tail['wikidata'])
+                                             )
+        rel_encoding_indus, rel_mask_indus = load_relation_data(
+                        os.path.join('data', 'relation', 'sector_industry',
+                         self.market_name + rname_tail['sector_industry'])
         )
+        # Concatenate relation encodings along the last dimension (axis=2)
+        self.rel_encoding = np.concatenate((rel_encoding_wiki, rel_encoding_indus), axis=2)
+
+        # Combine masks using logical OR operation and then adjust the values
+        combined_mask_flags = np.logical_or(rel_mask_wiki == -1e9, rel_mask_indus == -1e9)
+        self.rel_mask = np.where(combined_mask_flags, -1e9, 0)
         print('relation encoding shape:', self.rel_encoding.shape)
         print('relation mask shape:', self.rel_mask.shape)
     
